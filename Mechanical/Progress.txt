@@ -1,0 +1,30 @@
+Yellow:
+Axis1MotorHolderOp (done)
+Axis1MotorHolder (done)
+Axis1washer
+Axis2part2
+Axis2MotorOp (done)
+Axis2bearingHolder (1) (done)
+Axis2bearingHC
+Axis2MotorOpC (done)
+Axis2bearingHolder (done)
+Axis3part3
+Axis3part2
+Axis3cover1
+Axis3cover2
+Axis2Pulley v22
+Axis3bearingHolder
+Axis3bearingHolder2
+Axis1Pulley v13 (done)
+Axis1Holder (done)
+Body1
+Axis2washer
+
+
+
+Black:
+Axis3part1 v3 (1)
+Axis3part1 v3
+Axis2part1 v4
+Axis2part1 v4 (1)
+Axis1part2 v5
