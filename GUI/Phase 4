@@ -1,0 +1,543 @@
+import sys
+import time
+import tkinter as tk
+import tkinter.ttk as ttk
+from tkinter.constants import *
+import os.path
+import threading
+import serial
+import subprocess
+import cv2
+from PIL import Image, ImageTk
+
+global ser, connected
+
+ser = ''
+connected = 0
+
+_script = sys.argv[0]
+_location = os.path.dirname(_script)
+
+import UART_Interface_support
+
+_bgcolor = '#d9d9d9'  # X11 color: 'gray85'
+_fgcolor = '#000000'  # X11 color: 'black'
+_compcolor = 'gray40' # X11 color: #666666
+_ana1color = '#c3c3c3' # Closest X11 color: 'gray76'
+_ana2color = 'beige' # X11 color: #f5f5dc
+_tabfg1 = 'black' 
+_tabfg2 = 'black' 
+_tabbg1 = 'grey75' 
+_tabbg2 = 'grey89' 
+_bgmode = 'light' 
+
+class Toplevel1:
+    def __init__(self, top = None) :
+        '''This class configures and populates the toplevel window.
+           top is the toplevel containing window.'''
+        self.top = top
+
+        top.geometry("1300x600+383+106")
+        top.minsize(120, 1)
+        top.maxsize(2736, 749)
+        top.resizable(1,  1)
+        top.title("Robot Arm Controller")
+        top.configure(background="#d9d9d9")
+
+        
+
+        self.Labelframe1 = tk.LabelFrame(self.top)
+        self.Labelframe1.place(relx=0.02, rely=0.02, relheight=0.25
+                , relwidth=0.2)
+        self.Labelframe1.configure(relief='groove')
+        self.Labelframe1.configure(foreground="#000000")
+        self.Labelframe1.configure(text='''Wifi Connection''')
+        self.Labelframe1.configure(background="#d9d9d9")
+        self.Labelframe1.configure(cursor="fleur")
+
+        
+        # Create labels and entry widgets for SSID and password
+        self.Label1 = tk.Label(self.Labelframe1)
+        self.Label1.place(relx=0.03, rely=0.2, height=15, width=80
+                , bordermode='ignore')
+        self.Label1.configure(anchor='w')
+        self.Label1.configure(background="#d9d9d9")
+        self.Label1.configure(compound='left')
+        self.Label1.configure(disabledforeground="#a3a3a3")
+        self.Label1.configure(font="-family {Segoe UI} -size 9")
+        self.Label1.configure(foreground="#000000")
+        self.Label1.configure(text= "SSID: ")
+        
+        self.Label2 = tk.Label(self.Labelframe1)
+        self.Label2.place(relx=0.03, rely=0.4, height=15, width=80
+                , bordermode='ignore')
+        self.Label2.configure(anchor='w')
+        self.Label2.configure(background="#d9d9d9")
+        self.Label2.configure(compound='left')
+        self.Label2.configure(disabledforeground="#a3a3a3")
+        self.Label2.configure(font="-family {Segoe UI} -size 9")
+        self.Label2.configure(foreground="#000000")
+        self.Label2.configure(text='''Password: ''')
+
+        self.Entry1 = tk.Entry(self.Labelframe1)
+        self.Entry1.place(relx=0.35, rely=0.2, height=20, relwidth=0.5
+                , bordermode='ignore')
+        self.Entry1.configure(background="white")
+        self.Entry1.configure(disabledforeground="#a3a3a3")
+        self.Entry1.configure(font="TkFixedFont")
+        self.Entry1.configure(foreground="#000000")
+        self.Entry1.configure(insertbackground="black")
+
+        self.Entry2 = tk.Entry(self.Labelframe1)
+        self.Entry2.place(relx=0.35, rely=0.4, height=20, relwidth=0.5
+                , bordermode='ignore')
+        self.Entry2.configure(background="white")
+        self.Entry2.configure(disabledforeground="#a3a3a3")
+        self.Entry2.configure(font="TkFixedFont")
+        self.Entry2.configure(foreground="#000000")
+        self.Entry2.configure(insertbackground="black")
+
+        self.Button1 = tk.Button(self.Labelframe1)
+        self.Button1.place(relx=0.4, rely=0.6, height=25, width=60
+                , bordermode='ignore')
+        self.Button1.configure(activebackground="beige")
+        self.Button1.configure(activeforeground="black")
+        self.Button1.configure(background="#d9d9d9")
+        self.Button1.configure(compound='left')
+        self.Button1.configure(disabledforeground="#a3a3a3")
+        self.Button1.configure(font="-family {Segoe UI} -size 9")
+        self.Button1.configure(foreground="#000000")
+        self.Button1.configure(highlightbackground="#d9d9d9")
+        self.Button1.configure(highlightcolor="black")
+        self.Button1.configure(pady="0")
+        self.Button1.configure(text='''Connect''')
+        self.Button1.configure(command = self.connect_wifi)
+
+        self.status_label = tk.Label(self.Labelframe1)
+        self.status_label.place(relx=0.15, rely=0.77, height=25, width=180
+                , bordermode='ignore')
+        self.status_label.configure(compound='center')
+        self.status_label.configure(background="#d9d9d9")
+        self.status_label.configure(compound='left')
+        self.status_label.configure(disabledforeground="#a3a3a3")
+        self.status_label.configure(font="-family {Segoe UI} -size 9")
+        self.status_label.configure(foreground="#000000")
+
+
+ #      self.status_label = tk.Label(self.Labelframe3)
+ #       self.status_label.place(relx=0.33, rely=0.35, height=30, width=60
+ #               , bordermode='ignore')
+ #       self.status_label.configure(anchor='w')
+ #       self.status_label.configure(background="#d9d9d9")
+ #       self.status_label.configure(compound='left')
+ #       self.status_label.configure(disabledforeground="#a3a3a3")
+ #       self.status_label.configure(font="-family {Segoe UI} -size 8")
+ #       self.status_label.configure(foreground="red")
+ #       self.status_label.configure(text='''TURN OFF''')
+
+        
+    def connect_wifi(self):
+        # Get SSID and password from entry widgets
+        ssid = self.Entry1.get()
+        password = self.Entry2.get()
+
+        # Run netsh command to connect to Wi-Fi
+        command = f"netsh wlan connect ssid={ssid} keyMaterial={password}"
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, error = process.communicate()
+
+        # Display connection status
+        if "successfully" in output.decode():
+            self.status_label.config(text="Connected to Wi-Fi!")
+        else:
+            self.status_label.config(text="Connection to Wi-Fi failed.")
+
+
+class RoboticArmGUI:
+    def __init__(self, top = None):
+
+        self.top = top
+
+        self.Labelframe2 = tk.LabelFrame(self.top)
+        self.Labelframe2.place(relx=0.3, rely=0.02, relheight=0.47
+                , relwidth=0.2)
+        self.Labelframe2.configure(relief='groove')
+        self.Labelframe2.configure(foreground="#000000")
+        self.Labelframe2.configure(text='''Robot Arm Controller''')
+        self.Labelframe2.configure(background="#d9d9d9")
+        
+        # Set initial joint positions
+        self.joint_positions = [0, 0, 0, 0, 0, 0]
+
+        # Create GUI elements     
+        self.LabelJoint = tk.Label(self.Labelframe2)
+        self.LabelJoint.place(relx=0.35, rely=0.08, height=15, width=80
+                , bordermode='ignore')
+        self.LabelJoint.configure(anchor='w')
+        self.LabelJoint.configure(background="#d9d9d9")
+        self.LabelJoint.configure(compound='left')
+        self.LabelJoint.configure(disabledforeground="#a3a3a3")
+        self.LabelJoint.configure(font="-family {Segoe UI} -size 9")
+        self.LabelJoint.configure(foreground="#000000")
+        self.LabelJoint.configure(text= "Joint Positions:- ")
+
+        self.position_labels = []
+        for i in range(6):
+            
+            self.position_label = tk.Label(self.Labelframe2)
+            self.position_label.place(relx=0.4, rely=0.2+(i/8), height=15, width=80
+                , bordermode='ignore')
+            self.position_label.configure(anchor='w')
+            self.position_label.configure(background="#d9d9d9")
+            self.position_label.configure(compound='left')
+            self.position_label.configure(disabledforeground="#a3a3a3")
+            self.position_label.configure(font="-family {Segoe UI} -size 9")
+            self.position_label.configure(foreground="#000000")
+            self.position_label.configure(text= f"Joint {i+1}: {self.joint_positions[i]} ")
+            self.position_labels.append(self.position_label)
+       
+        self.plus_buttons = []
+        self.minus_buttons = []
+        self.is_incrementing = False
+
+        for i in range(6):
+
+            self.ButtonPlus = tk.Button(self.Labelframe2)
+            self.ButtonPlus.place(relx=0.68, rely=0.18+(i/8), height=30, width=30
+                , bordermode='ignore')
+            self.ButtonPlus.configure(activebackground="beige")
+            self.ButtonPlus.configure(activeforeground="black")
+            self.ButtonPlus.configure(background="#d9d9d9")
+            self.ButtonPlus.configure(compound='left')
+            self.ButtonPlus.configure(disabledforeground="#a3a3a3")
+            self.ButtonPlus.configure(font="-family {Segoe UI} -size 9")
+            self.ButtonPlus.configure(foreground="#000000")
+            self.ButtonPlus.configure(highlightbackground="#d9d9d9")
+            self.ButtonPlus.configure(highlightcolor="black")
+            self.ButtonPlus.configure(pady="0")
+            self.ButtonPlus.configure(text='''+''')
+            self.ButtonPlus.bind("<ButtonPress>", lambda event, index=i: self.start_increment(event, index))
+            self.ButtonPlus.bind("<ButtonRelease>", self.stop_increment)    
+            self.plus_buttons.append(self.ButtonPlus)           
+
+            self.ButtonMinus = tk.Button(self.Labelframe2)
+            self.ButtonMinus.place(relx=0.23, rely=0.18+(i/8), height=30, width=30
+                , bordermode='ignore')
+            self.ButtonMinus.configure(activebackground="beige")
+            self.ButtonMinus.configure(activeforeground="black")
+            self.ButtonMinus.configure(background="#d9d9d9")
+            self.ButtonMinus.configure(compound='left')
+            self.ButtonMinus.configure(disabledforeground="#a3a3a3")
+            self.ButtonMinus.configure(font="-family {Segoe UI} -size 9")
+            self.ButtonMinus.configure(foreground="#000000")
+            self.ButtonMinus.configure(highlightbackground="#d9d9d9")
+            self.ButtonMinus.configure(highlightcolor="black")
+            self.ButtonMinus.configure(pady="0")
+            self.ButtonMinus.configure(text='''-''')
+            self.ButtonMinus.bind("<ButtonPress>", lambda event, index=i: self.start_decrement(event, index))
+            self.ButtonMinus.bind("<ButtonRelease>", self.stop_decrement)  
+            self.minus_buttons.append(self.ButtonMinus) 
+
+        self.Labelframe3 = tk.LabelFrame(self.top)
+        self.Labelframe3.place(relx=0.02, rely=0.3, relheight=0.28
+                , relwidth=0.2)
+        self.Labelframe3.configure(relief='groove')
+        self.Labelframe3.configure(foreground="#000000")
+        self.Labelframe3.configure(text='''Control and Reset Button''')
+        self.Labelframe3.configure(background="#d9d9d9")
+
+        self.on_off_button = tk.Button(self.Labelframe3)
+        self.on_off_button.place(relx=0.15, rely=0.22, height=20, width=45
+                , bordermode='ignore')
+        self.on_off_button.configure(activebackground="beige")
+        self.on_off_button.configure(activeforeground="black")
+        self.on_off_button.configure(background="red")
+        self.on_off_button.configure(compound='left')
+        self.on_off_button.configure(disabledforeground="#a3a3a3")
+        self.on_off_button.configure(font="-family {Segoe UI} -size 9")
+        self.on_off_button.configure(foreground="#000000")
+        self.on_off_button.configure(highlightbackground="#d9d9d9")
+        self.on_off_button.configure(pady="0")
+        self.on_off_button.configure(text='''OFF''')
+        self.status = False
+        self.on_off_button.configure(command = lambda: self.toggle_status(self.status))
+
+        self.Reset_Button = tk.Button(self.Labelframe3)
+        self.Reset_Button.place(relx=0.45, rely=0.22, height=20, width=100
+                , bordermode='ignore')
+        self.Reset_Button.configure(activebackground="beige")
+        self.Reset_Button.configure(activeforeground="black")
+        self.Reset_Button.configure(background="#4683b7")
+        self.Reset_Button.configure(compound='left')
+        self.Reset_Button.configure(disabledforeground="#a3a3a3")
+        self.Reset_Button.configure(font="-family {Segoe UI} -size 8")
+        self.Reset_Button.configure(foreground="#000000")
+        self.Reset_Button.configure(highlightbackground="#d9d9d9")
+        self.Reset_Button.configure(highlightcolor="black")
+        self.Reset_Button.configure(pady="0")
+        self.Reset_Button.configure(text='''RESET POSITION''')
+        self.Reset_Button.configure(command = self.reset_position)
+
+        self.Labelframe4 = tk.LabelFrame(self.top)
+        self.Labelframe4.place(relx=0.02, rely=0.6, relheight=0.38
+                , relwidth=0.48)
+        self.Labelframe4.configure(relief='groove')
+        self.Labelframe4.configure(foreground="#000000")
+        self.Labelframe4.configure(text='''Slider Bar Joint Control''')
+        self.Labelframe4.configure(background="#d9d9d9")
+
+         # Create variables to store value and slider position
+        self.values = []
+
+        # Create sliders
+        self.sliders = []
+        for i in range(6):
+            value = tk.IntVar()
+            self.values.append(value)
+          #  value.set(0.0)
+            saved_position1 = tk.IntVar()
+            saved_position2 = tk.IntVar()
+            saved_position3 = tk.IntVar()
+            self.slider = tk.Scale(self.Labelframe4)
+            self.slider.place(relx=0.04+i/7, rely=0.15)
+            self.slider.configure(from_=180.0, to=-180.0)
+            self.slider.configure(orient=tk.VERTICAL)
+            self.slider.configure(length=150)
+            self.slider.configure(foreground="black")
+            self.slider.configure(background="#d9d9d9")
+            self.slider.configure(highlightbackground="#d9d9d9")
+            self.slider.configure(variable= self.values[i])
+            self.slider.configure(command=lambda value, index=i: self.update_value(value, index))
+            self.sliders.append( ( value, saved_position1, saved_position2, saved_position3, self.slider))      
+
+        for i in range(6):
+            self.LabelSlider = tk.Label(self.Labelframe4)
+            self.LabelSlider.place(relx=0.1+i/7, rely=0.08, bordermode='ignore')
+            self.LabelSlider.configure(anchor='w')
+            self.LabelSlider.configure(background="#d9d9d9")
+            self.LabelSlider.configure(compound='left')
+            self.LabelSlider.configure(disabledforeground="#a3a3a3")
+            self.LabelSlider.configure(font="-family {Segoe UI} -size 9")
+            self.LabelSlider.configure(foreground="#000000")
+            self.LabelSlider.configure(text= "J" + str(i+1))
+        
+        pos_saved_y= 0.45
+        for i in range(3):
+            self.Label_Saved_Position = tk.Label(self.Labelframe3)
+            self.Label_Saved_Position.place(relx=0.05, rely=pos_saved_y+i/5, height=20, width=100
+                , bordermode='ignore')
+            self.Label_Saved_Position.configure(anchor='w')
+            self.Label_Saved_Position.configure(background="#d9d9d9")
+            self.Label_Saved_Position.configure(compound='left')
+            self.Label_Saved_Position.configure(disabledforeground="#a3a3a3")
+            self.Label_Saved_Position.configure(font="-family {Segoe UI} -size 9")
+            self.Label_Saved_Position.configure(foreground="#000000")
+            self.Label_Saved_Position.configure(text= "Saved Position " + str(i+1) + " : ")
+
+        for x in range(3):
+            self.memory_button = tk.Button(self.Labelframe3, text="Save",  command=lambda val= x+1: self.save_position(val))
+            self.memory_button.place(relx=0.5, rely=pos_saved_y+x/5, height=20, width=60
+                , bordermode='ignore')
+
+        for y in range(3):
+            self.set_button = tk.Button(self.Labelframe3, text="Move", command=lambda val= y+1: self.move_to_saved_position(val))
+            self.set_button.place(relx=0.75, rely=pos_saved_y +y/5, height=20, width=60
+                , bordermode='ignore')
+            
+
+    def save_position(self, val):
+        for i in range(6):
+            if val ==1:
+                self.sliders[i][1].set(self.sliders[i][0].get())
+               # print("X")
+            elif val==2:
+                self.sliders[i][2].set(self.sliders[i][0].get())
+            elif val==3:
+                self.sliders[i][3].set(self.sliders[i][0].get())
+             #   print("Y")
+
+    def move_to_saved_position(self, val):
+        for i in range(6):
+            if val ==1:
+                self.sliders[i][0].set(self.sliders[i][1].get())
+                self.position_labels[i].config(text=f"Joint {i+1}: {self.sliders[i][1].get()}")
+               # print("1")
+            elif val==2:
+                self.sliders[i][0].set(self.sliders[i][2].get())
+                self.position_labels[i].config(text=f"Joint {i+1}: {self.sliders[i][2].get()}")
+            elif val==3:
+                self.sliders[i][0].set(self.sliders[i][3].get())
+                self.position_labels[i].config(text=f"Joint {i+1}: {self.sliders[i][3].get()}")
+                #print("2")
+            #self.joint_positions[i]. 
+            
+
+    def increment_position(self, index):
+        # Increment joint position and update position label
+        if self.is_incrementing and self.joint_positions[index]<=175:
+                self.joint_positions[index] += 5
+                self.position_labels[index].config(text=f"Joint {index+1}: {self.joint_positions[index]}")
+                self.top.after(100, lambda: self.increment_position(index))
+                self.values[index].set(self.joint_positions[index])
+
+    def decrement_position(self, index):
+        # Decrement joint position and update position label
+        if self.is_decrementing and self.joint_positions[index]>= -175:
+                self.joint_positions[index] -= 5
+                self.position_labels[index].config(text=f"Joint {index+1}: {self.joint_positions[index]}")
+                self.top.after(100, lambda: self.decrement_position(index))
+                self.values[index].set(self.joint_positions[index])
+    
+    def update_value(self, value, index):
+        self.joint_positions[index] = int(value)
+        self.position_labels[index].config(text=f"Joint {index+1}: {value}")
+
+    def run(self):
+        self.root.mainloop()
+    
+
+    def start_increment(self, event, index):
+        self.is_incrementing = True
+        self.increment_position(index)
+
+    def stop_increment(self, event):
+        self.is_incrementing = False
+
+    def start_decrement(self, event, index):
+        self.is_decrementing = True
+        self.decrement_position(index)
+
+    def stop_decrement(self, event):
+        self.is_decrementing = False
+
+    def reset_position(self):
+        # Reset the array to an empty list and update the display label
+        for i in range(6):
+            self.joint_positions[i] = 0
+            self.position_labels[i].config(text=f"Joint {i+1}: {self.joint_positions[i]}")
+        for var in self.values:
+            var.set(0)
+
+    def create_widgets(self):
+        self.on_off_button = tk.Button(self, bg="red")
+        self.on_off_button["text"] = "OFF"
+        self.on_off_button["command"] = self.toggle_status
+        self.on_off_button.pack(side="top")
+        
+        self.status_label = tk.Label(self, text="OFF", fg="red")
+        self.status_label.pack(side="bottom")
+
+
+    def toggle_status(self, status):
+        self.status = not self.status
+        if self.status:
+            self.on_off_button["text"] = "ON"
+            self.on_off_button["bg"] = "green"
+       #     self.status_label.config(text="TURN ON", fg="green")
+        else:
+            self.on_off_button["text"] = "OFF"
+            self.on_off_button["bg"] = "red"
+      #      self.status_label.config(text="TURN OFF", fg="red")
+class CameraGUI:
+    def __init__(self, top=None):
+        self.top = top
+
+        if self.top is None:
+            self.top = tk.Tk()
+
+        self.Labelframe1 = tk.LabelFrame(self.top)
+        self.Labelframe1.place(relx=0.52, rely=0.02, relheight=0.55
+                , relwidth=0.45)
+        self.Labelframe1.configure(relief='groove')
+        self.Labelframe1.configure(foreground="#000000")
+        self.Labelframe1.configure(text='''Camera''')
+        self.Labelframe1.configure(background="#d9d9d9")
+
+        # Create a label to display the camera feed
+        self.camera_label = tk.Label(self.Labelframe1)
+      #  self.camera_label.pack()
+        self.camera_label.place(relx=0.05, rely=0.2, relheight=0.78
+                , relwidth=0.9)
+
+        # Create an "On" button to start the camera feed
+        self.on_button = tk.Button(self.Labelframe1, text="On", command=self.start_camera)
+       # self.on_button.pack()
+        self.on_button.place(relx=0.2, rely=0.03, height=20
+                , width=40)
+
+        # Create an "Off" button to stop the camera feed
+        self.off_button = tk.Button(self.Labelframe1, text="Off", command=self.stop_camera, state=tk.DISABLED)
+       # self.off_button.pack()
+        self.off_button.place(relx=0.4, rely=0.03, height=20
+                , width=40)
+
+        
+        # Initialize the camera feed as stopped
+        self.camera = None
+        self.camera_on = False
+
+    def start_camera(self):
+        # Open the default camera
+        self.camera = cv2.VideoCapture(0)
+        if not self.camera.isOpened():
+            raise Exception("Could not open camera")
+
+
+        # Enable the "Off" button and disable the "On" button
+        self.off_button.config(state=tk.NORMAL)
+        self.on_button.config(state=tk.DISABLED)
+
+        # Set the camera feed as on
+        self.camera_on = True
+
+        # Call the update_camera method to update the camera feed
+        self.update_camera()
+
+    def stop_camera(self):
+        # Release the camera and delete the label
+        self.camera.release()
+        self.camera_label.pack_forget()
+
+        # Disable the "Off" button and enable the "On" button
+        self.off_button.config(state=tk.DISABLED)
+        self.on_button.config(state=tk.NORMAL)
+
+        # Set the camera feed as off
+        self.camera_on = False
+
+    def update_camera(self):
+        if self.camera_on:
+            # Read a frame from the camera
+            ret, frame = self.camera.read()
+            if ret:
+                # Convert the frame from BGR to RGB format
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+                # Create a PIL image from the frame
+                image = Image.fromarray(frame)
+
+                # Create a PhotoImage from the PIL image
+                photo = ImageTk.PhotoImage(image)
+
+                # Update the camera label with the new photo
+                self.camera_label.configure(image=photo)
+                self.camera_label.image = photo
+
+            # Call the update_camera method again after a delay of 10 milliseconds
+            self.top.after(10, self.update_camera)
+
+    def start(self):
+        if self.top is not None:
+            self.top.mainloop()
+
+if __name__ == '__main__':
+    global root, gui, t1, t2
+
+    root = tk.Tk()
+    gui = Toplevel1(root)
+    robot_controller = RoboticArmGUI(root)
+    camera = CameraGUI(root)
+   # gui.che52.set(1)
+
+
+    root.mainloop()
