@@ -1,0 +1,11 @@
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\bin\Debug\Robot Arm Controller_Client.exe.config
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\bin\Debug\Robot Arm Controller_Client.exe
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\bin\Debug\Robot Arm Controller_Client.pdb
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\obj\Debug\Robot Arm Controller_Client.csproj.AssemblyReference.cache
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\obj\Debug\Robot Arm Controller_Client.csproj.SuggestedBindingRedirects.cache
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\obj\Debug\Robot_Arm_Controller_Client.Form1.resources
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\obj\Debug\Robot_Arm_Controller_Client.Properties.Resources.resources
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\obj\Debug\Robot Arm Controller_Client.csproj.GenerateResource.cache
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\obj\Debug\Robot Arm Controller_Client.csproj.CoreCompileInputs.cache
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\obj\Debug\Robot Arm Controller_Client.exe
+C:\Users\ASUS\OneDrive\Documents\Mechatronics Engineering 3rd Year Sem2\Software Engineering\Robot Arm Controller_Client\Robot Arm Controller_Client\obj\Debug\Robot Arm Controller_Client.pdb
